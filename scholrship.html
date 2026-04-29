@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Scholar Elite | Scholarship Portal</title>
+  <style>
+    /* ========== CSS (exactly as before – no changes) ========== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-body: #f4f9fe; --bg-surface: #ffffff; --bg-muted: #f0f4fa;
+      --accent: #1e6f9f; --accent-light: #e3f0f8; --accent-dark: #0f4a6e;
+      --text-primary: #1a2c3e; --text-secondary: #5a6e7c; --border-light: #dee9f0;
+      --success: #1f8a4c; --success-bg: #e0f2e9; --warning: #d97706;
+      --danger: #dc2626; --danger-bg: #fee2e2; --info: #3b82f6;
+      --radius-card: 24px; --radius-btn: 40px; --shadow-sm: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-body); color: var(--text-primary); line-height: 1.45; }
+    #auth { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; background: linear-gradient(125deg, #e9f0f9 0%, #d4e2f0 100%); }
+    .auth-card { background: var(--bg-surface); border-radius: 2rem; padding: 2rem 1.8rem; width: 100%; max-width: 460px; box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+    .logo { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 1.5rem; }
+    .logo-icon { background: var(--accent); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 28px; font-size: 1.7rem; color: white; }
+    .logo-text { font-size: 1.6rem; font-weight: 600; }
+    .tabs { display: flex; gap: 0.5rem; background: var(--bg-muted); padding: 0.3rem; border-radius: 60px; margin-bottom: 1.6rem; }
+    .tab { flex: 1; border: none; background: transparent; padding: 0.6rem 0; border-radius: 40px; font-weight: 500; cursor: pointer; color: var(--text-secondary); transition: 0.2s; }
+    .tab.active { background: white; color: var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .role-row { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; }
+    .role-btn { flex: 1; text-align: center; padding: 0.6rem; border-radius: 40px; background: var(--bg-muted); border: 1px solid var(--border-light); cursor: pointer; font-weight: 500; transition: 0.2s; }
+    .role-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .fg { margin-bottom: 1rem; }
+    .fg label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.3rem; color: var(--text-secondary); }
+    .fg input, .fg select, .fg textarea { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-light); border-radius: 60px; background: var(--bg-muted); font-size: 0.9rem; }
+    .btn-primary { background: var(--accent); color: white; border: none; width: 100%; padding: 0.8rem; border-radius: 60px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .alert { padding: 0.6rem 1rem; border-radius: 60px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+    .alert.show { display: block; }
+    .alert.err { background: var(--danger-bg); color: var(--danger); }
+    .alert.ok { background: var(--success-bg); color: var(--success); }
+    .hint { font-size: 0.75rem; text-align: center; margin-top: 1rem; color: var(--text-secondary); }
+    #app { display: none; }
+    .app-layout { display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; background: var(--bg-surface); border-right: 1px solid var(--border-light); position: fixed; height: 100vh; left: 0; top: 0; display: flex; flex-direction: column; z-index: 20; }
+    .sb-head { padding: 1.5rem 1.2rem; border-bottom: 1px solid var(--border-light); }
+    .sb-logo { display: flex; align-items: center; gap: 0.5rem; }
+    .sb-icon { background: var(--accent); width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+    .sb-nav { flex: 1; padding: 1rem 0.8rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem 1rem; border-radius: 60px; cursor: pointer; color: var(--text-secondary); margin-bottom: 0.3rem; transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+    .sb-footer { padding: 1rem; border-top: 1px solid var(--border-light); }
+    .user-row { display: flex; align-items: center; gap: 0.7rem; cursor: pointer; padding: 0.5rem; border-radius: 60px; }
+    .av { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
+    .content { margin-left: 260px; flex: 1; padding: 1.8rem; }
+    .topbar { background: var(--bg-surface); padding: 0.8rem 1.5rem; border-radius: 60px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .tb-title { font-size: 1.3rem; font-weight: 600; }
+    .tb-search input { padding: 0.5rem 1rem; border-radius: 60px; border: 1px solid var(--border-light); background: var(--bg-muted); width: 240px; }
+    .card { background: var(--bg-surface); border-radius: 24px; padding: 1.2rem; margin-bottom: 1.2rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+    .badge { display: inline-flex; padding: 0.2rem 0.8rem; border-radius: 40px; font-size: 0.7rem; font-weight: 600; }
+    .b-green { background: var(--success-bg); color: var(--success); }
+    .b-blue { background: #eef2ff; color: #3b82f6; }
+    .b-amber { background: #fff4e6; color: #d97706; }
+    .b-red { background: var(--danger-bg); color: var(--danger); }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat { background: var(--bg-surface); border-radius: 1.5rem; padding: 1rem; border: 1px solid var(--border-light); text-align: center; }
+    .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+    .sch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .sch-card { background: var(--bg-surface); border-radius: 1.5rem; padding: 1.2rem; border: 1px solid var(--border-light); cursor: pointer; transition: 0.2s; }
+    .sch-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 0.8rem; background: var(--bg-surface); padding: 1rem; border-radius: 60px; margin-bottom: 1.5rem; align-items: center; }
+    .filter-row select, .filter-row button { padding: 0.4rem 1rem; border-radius: 40px; border: 1px solid var(--border-light); background: var(--bg-muted); }
+    .f-btn.act { background: var(--accent); color: white; border: none; }
+    .btn-apply { background: var(--accent); color: white; border: none; padding: 0.4rem 1rem; border-radius: 40px; cursor: pointer; }
+    .dt { width: 100%; border-collapse: collapse; }
+    .dt th, .dt td { padding: 0.7rem 0.3rem; border-bottom: 1px solid var(--border-light); text-align: left; }
+    .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .doc-card { background: var(--bg-muted); border-radius: 1rem; padding: 0.8rem; cursor: pointer; border: 1px solid var(--border-light); }
+    .track-steps { display: flex; justify-content: space-between; margin: 1.5rem 0; position: relative; }
+    .track-step { flex: 1; text-align: center; position: relative; z-index: 1; }
+    .track-step:not(:last-child)::after { content: ''; position: absolute; top: 20px; left: 50%; width: 100%; height: 3px; background: var(--border-light); z-index: -1; }
+    .track-step.completed:not(:last-child)::after, .track-step.current:not(:last-child)::after { background: var(--success); }
+    .step-circle { width: 40px; height: 40px; background: var(--bg-muted); border: 2px solid var(--border-light); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 0.5rem; }
+    .track-step.completed .step-circle { background: var(--success); border-color: var(--success); color: white; }
+    .track-step.current .step-circle { background: var(--accent); border-color: var(--accent); color: white; }
+    .rejection-message { background: var(--danger-bg); border-left: 4px solid var(--danger); padding: 0.8rem; border-radius: 1rem; margin-top: 1rem; font-size: 0.85rem; color: var(--danger); }
+    .modal-wrap { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: white; border-radius: 2rem; max-width: 720px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 1.5rem; }
+    .progress-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.8rem; }
+    .pbar { height: 6px; background: var(--border-light); border-radius: 10px; margin-bottom: 1rem; overflow: hidden; }
+    .pfill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+    .step-dots { display: flex; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem; }
+    .step-dot-item { text-align: center; flex: 1; min-width: 60px; }
+    .sdot { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-muted); display: inline-flex; align-items: center; justify-content: center; font-weight: 600; margin-bottom: 0.3rem; }
+    .sdot.active { background: var(--accent); color: white; }
+    .sdot.done { background: var(--success); color: white; }
+    .step-block { display: none; }
+    .step-block.active { display: block; }
+    .modal-foot { display: flex; justify-content: space-between; margin-top: 1.5rem; }
+    .btn-prev, .btn-next { padding: 0.5rem 1.2rem; border-radius: 40px; border: none; background: var(--accent); color: white; cursor: pointer; }
+    .btn-prev { background: #cbd5e1; color: #1e293b; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: white; border-radius: 60px; padding: 0.6rem 1rem; border-left: 4px solid var(--accent); z-index: 9999; }
+    .page { display: none; }
+    .page.active-page { display: block; }
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 700px) { .sidebar { width: 80px; } .content { margin-left: 80px; } .profile-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- ========== HTML STRUCTURE (identical to your original) ========== -->
+<div id="auth">
+  <div class="auth-card">
+    <div class="logo"><div class="logo-icon">🎓</div><span class="logo-text">Scholar Elite</span></div>
+    <div class="tabs">
+      <button class="tab active" onclick="authTab('login',this)">Sign in</button>
+      <button class="tab" onclick="authTab('signup',this)">Register</button>
+      <button class="tab" onclick="authTab('forgot',this)">Forgot password</button>
+    </div>
+    <div id="auth-alert" class="alert"></div>
+    <div id="t-login">
+      <div class="role-row"><div class="role-btn active" id="r-student" onclick="setRole('student')">Student</div><div class="role-btn" id="r-admin" onclick="setRole('admin')">Admin</div></div>
+      <div class="fg"><label>Email</label><input type="email" id="l-email" placeholder="your@email.com"></div>
+      <div class="fg"><label>Password</label><input type="password" id="l-pw" placeholder="••••••••"></div>
+      <button class="btn-primary" onclick="doLogin()">Sign in</button>
+      <p class="hint">Student: student@test.com / Test@123 | Admin: admin@test.com / Test@123</p>
+    </div>
+    <div id="t-signup" style="display:none">
+      <div class="fg"><label>First name</label><input id="s-fn" placeholder="Rahul"></div>
+      <div class="fg"><label>Last name</label><input id="s-ln" placeholder="Kumar"></div>
+      <div class="fg"><label>Email</label><input type="email" id="s-email" placeholder="your@email.com"></div>
+      <div class="fg"><label>Password</label><input type="password" id="s-pw" placeholder="Min 8 characters"></div>
+      <div class="fg"><label>Confirm password</label><input type="password" id="s-cpw" placeholder="Repeat password"></div>
+      <button class="btn-primary" onclick="doSignup()">Create account</button>
+    </div>
+    <div id="t-forgot" style="display:none">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">Enter your email and we'll send a reset link.</p>
+      <div class="fg"><label>Email</label><input type="email" id="f-email" placeholder="your@email.com"></div>
+      <button class="btn-primary" onclick="doForgot()">Send reset link</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sb-head"><div class="sb-logo"><div class="sb-icon">SE</div><span>Scholar Elite</span></div></div>
+      <nav class="sb-nav" id="nav-student" style="display:none">
+        <div class="nav-item" data-page="dashboard">🏠 Dashboard</div>
+        <div class="nav-item" data-page="scholarships">🏆 Browse scholarships</div>
+        <div class="nav-item" data-page="applications">📋 My applications</div>
+        <div class="nav-item" data-page="documents">📁 Documents</div>
+        <div class="nav-item" data-page="tracking">📍 Track status</div>
+        <div class="nav-item" data-page="profile">👤 My profile</div>
+      </nav>
+      <nav class="sb-nav" id="nav-admin" style="display:none">
+        <div class="nav-item" data-page="a-dash">📊 Admin Dashboard</div>
+        <div class="nav-item" data-page="a-apps">📋 All applications</div>
+        <div class="nav-item" data-page="a-students">👥 Students</div>
+        <div class="nav-item" data-page="a-scholarships">🏅 Manage scholarships</div>
+        <div class="nav-item" data-page="a-docs">✅ Document verification</div>
+      </nav>
+      <div class="sb-footer"><div class="user-row" onclick="doLogout()"><div class="av" id="sb-av">RK</div><div><div id="sb-un">Rahul Kumar</div><div class="ur" id="sb-ur">Student</div></div><span style="margin-left:auto;">🚪</span></div></div>
+    </aside>
+    <main class="content">
+      <div class="topbar"><span class="tb-title" id="tb-title">Dashboard</span><div class="tb-search"><input type="text" id="globalSearch" placeholder="🔍 Search scholarships..." oninput="handleGlobalSearch(this.value)"></div></div>
+      <div id="page-dashboard" class="page"><div class="pg-title" id="dash-welcome"></div><div id="dash-msg" style="margin-bottom:0.5rem;"></div><div class="stats-row" id="dash-stats"></div><div class="card"><div>Recent applications</div><div id="dash-apps"></div></div><div class="card"><div>Profile strength</div><div id="profile-completion-card"></div></div></div>
+      <div id="page-scholarships" class="page"><div class="pg-title">✨ Scholarships</div><div class="filter-row"><select id="incomeFilter"><option value="">Income: Any</option><option value="50000">≤₹50k</option><option value="100000">≤₹1L</option><option value="250000">≤₹2.5L</option><option value="500000">≤₹5L</option></select><select id="marksFilter"><option value="">Marks: Any</option><option value="60">60%+</option><option value="70">70%+</option><option value="80">80%+</option><option value="90">90%+</option></select><select id="categoryFilter"><option value="">Category: All</option><option value="OBC">OBC</option><option value="SC/ST">SC/ST</option><option value="General">General</option><option value="Minority">Minority</option><option value="EWS">EWS</option></select><select id="sortBy"><option value="amount">Highest amount</option><option value="deadline">Earliest deadline</option><option value="name">Name A–Z</option></select><button class="f-btn act" onclick="applyFiltersAndSort()">Apply</button><button class="f-btn" onclick="resetAllFilters()">Reset</button></div><div class="sch-grid" id="scholarshipGrid"></div></div>
+      <div id="page-applications" class="page"><div class="pg-title">My applications</div><div class="card" id="apps-card"></div></div>
+      <div id="page-documents" class="page"><div class="pg-title">Documents</div><div class="card"><div id="doc-grid" class="doc-grid"></div></div></div>
+      <div id="page-tracking" class="page"><div class="pg-title">📍 Application tracker</div><div id="track-list"></div></div>
+      <div id="page-profile" class="page"><div class="pg-title">My profile</div><div class="card"><div class="profile-grid"><div class="fg"><label>Full name</label><input id="p-name"></div><div class="fg"><label>DOB</label><input type="date" id="p-dob"></div><div class="fg"><label>Aadhaar</label><input id="p-aadhaar"></div><div class="fg"><label>Mobile</label><input id="p-phone"></div><div class="fg"><label>Gender</label><select id="p-gender"><option>Male</option><option>Female</option></select></div><div class="fg"><label>Category</label><select id="p-cat"><option>General</option><option>OBC</option><option>SC/ST</option><option>Minority</option><option>EWS</option></select></div><div class="fg"><label>10th %</label><input id="p-ssc" type="number"></div><div class="fg"><label>12th %</label><input id="p-inter" type="number"></div><div class="fg"><label>College</label><input id="p-college"></div><div class="fg"><label>Course</label><input id="p-course"></div><div class="fg"><label>CGPA</label><input id="p-cgpa"></div><div class="fg"><label>Year</label><select id="p-year"><option>1st</option><option>2nd</option><option>3rd</option><option>4th</option></select></div><div class="fg"><label>Income (₹)</label><input id="p-income" type="number"></div><div class="fg"><label>State</label><input id="p-state"></div><div class="fg"><label>Disability</label><select id="p-disability"><option>None</option><option>Physical</option><option>Visual</option></select></div></div><button class="btn-primary" onclick="saveProfile()">Save profile</button></div></div>
+      <div id="page-a-dash" class="page"><div class="pg-title">Admin Dashboard</div><div class="stats-row" id="admin-stats"></div><div class="card"><div>Recent Applications</div><div id="a-recent"></div></div></div>
+      <div id="page-a-apps" class="page"><div class="pg-title">All Applications</div><input type="text" id="admAppSearch" placeholder="Search by student or scholarship..." class="fg" style="border-radius:40px; margin-bottom:1rem;" oninput="renderAdminApps()"><div class="card"><table class="dt"><thead><tr><th>Student</th><th>Scholarship</th><th>Status</th><th>Action</th></tr></thead><tbody id="a-apps-tbody"></tbody></table></div></div>
+      <div id="page-a-students" class="page"><div class="pg-title">Student Directory</div><input type="text" id="admStudentSearch" placeholder="Search by name..." class="fg" style="border-radius:40px; margin-bottom:1rem;" oninput="renderAdminStudents()"><div class="card"><table class="dt"><thead><tr><th>Name</th><th>Email</th><th>College</th><th>Applications</th></tr></thead><tbody id="a-stu-tbody"></tbody></td></div></div>
+      <div id="page-a-scholarships" class="page"><div class="pg-title">Manage Scholarships</div><button class="btn-primary" style="width:auto; margin-bottom:1rem;" onclick="openScholarshipModal()">+ Add New Scholarship</button><div class="card"><table class="dt"><thead><tr><th>Name</th><th>Amount</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="a-sch-tbody"></tbody></table></div></div>
+      <div id="page-a-docs" class="page"><div class="pg-title">Document Verification</div><div class="card"><table class="dt"><thead><tr><th>Student</th><th>Document</th><th>Status</th><th>Action</th></tr></thead><tbody id="a-doc-tbody"></tbody></table></div></div>
+    </main>
+  </div>
+</div>
+
+<!-- Application Modal (5-step) -->
+<div class="modal-wrap" id="applyModal"><div class="modal"><div class="progress-row"><span id="stepLabel">Step 1 of 5</span><span id="stepPercent">20%</span></div><div class="pbar"><div class="pfill" id="pfill"></div></div><div class="step-dots" id="stepDots"></div><div class="step-block active" id="step1"><h3>Personal confirmation</h3><div class="fg"><label>Full name</label><input id="appName"></div><div class="fg"><label>DOB</label><input type="date" id="appDob"></div><div class="fg"><label>Aadhaar</label><input id="appAadhaar"></div><div class="fg"><label>Mobile</label><input id="appPhone"></div><div class="fg"><label>Email</label><input type="email" id="appEmail"></div><div class="fg"><label>Address</label><input id="appAddress"></div></div><div class="step-block" id="step2"><h3>Bank details</h3><div class="info-box" style="background:#eef2ff; padding:0.8rem; border-radius:1rem;">💰 Scholarship funds will be directly transferred to this account.</div><div class="fg"><label>Account holder</label><input id="bankAccName"></div><div class="fg"><label>Account number</label><input id="bankAccNo"></div><div class="fg"><label>Re-enter account</label><input id="bankAccNo2"></div><div class="fg"><label>IFSC</label><input id="bankIfsc"></div><div class="fg"><label>Bank name</label><input id="bankName"></div><div class="fg"><label>Branch</label><input id="bankBranch"></div></div><div class="step-block" id="step3"><h3>Academic details</h3><div class="fg"><label>College</label><input id="appCollege"></div><div class="fg"><label>Course</label><input id="appCourse"></div><div class="fg"><label>Year</label><select id="appYear"><option>1st</option><option>2nd</option><option>3rd</option><option>4th</option></select></div><div class="fg"><label>CGPA</label><input id="appCgpa" type="number" step="any"></div><div class="fg"><label>10th %</label><input id="appSsc" type="number"></div><div class="fg"><label>12th %</label><input id="appInter" type="number"></div><div class="fg"><label>Enrollment</label><input id="appEnroll"></div><div class="fg"><label>Tuition fees (₹)</label><input id="appTuition" type="number"></div></div><div class="step-block" id="step4"><h3>Additional info</h3><div class="fg"><label>Essay (min 20 words)</label><textarea id="appEssay" rows="3"></textarea><span id="wordCount" style="font-size:0.7rem;">0 words</span></div><div class="fg"><label>Family background</label><textarea id="appFamily" rows="2"></textarea></div><div class="fg"><label>Career goals</label><textarea id="appGoals" rows="2"></textarea></div><div class="fg"><label>Annual income (₹)</label><input type="number" id="appIncome"></div><div class="fg"><label>Category</label><select id="appCategory"><option>General</option><option>OBC</option><option>SC</option><option>ST</option><option>Minority</option><option>EWS</option></select></div></div><div class="step-block" id="step5"><h3>Documents</h3><div id="modalDocsGrid" class="doc-grid"></div><div style="margin-top:1rem; background:#e0f2e9; padding:0.6rem; border-radius:1rem;">✅ By submitting, I certify all information is accurate.</div></div><div class="modal-foot"><button class="btn-prev" id="prevBtn" style="display:none;" onclick="prevStep()">← Previous</button><button class="btn-next" id="nextBtn" onclick="nextStep()">Next step →</button></div></div></div>
+
+<!-- Scholarship Edit Modal -->
+<div class="modal-wrap" id="scholarshipModal"><div class="modal" style="max-width:500px;"><h3 id="schModalTitle">Add Scholarship</h3><div class="fg"><label>Name</label><input id="schName"></div><div class="fg"><label>Organisation</label><input id="schOrg"></div><div class="fg"><label>Amount (₹)</label><input type="number" id="schAmt"></div><div class="fg"><label>Deadline (YYYY-MM-DD)</label><input type="date" id="schDl"></div><div class="fg"><label>Income limit (₹)</label><input type="number" id="schIncome"></div><div class="fg"><label>Min marks (%)</label><input type="number" id="schMinM"></div><div class="fg"><label>Categories (comma separated)</label><input id="schCats" placeholder="General,OBC,SC/ST"></div><div class="fg"><label>Tag</label><input id="schTag" placeholder="National"></div><div class="fg"><label>Description</label><textarea id="schDesc" rows="2"></textarea></div><div class="modal-foot" style="margin-top:1rem;"><button class="btn-prev" onclick="closeScholarshipModal()">Cancel</button><button class="btn-next" onclick="saveScholarship()">Save</button></div></div></div>
+
+<script>
+  // ======================== BACKEND API BASE ========================
+  const API_BASE = 'http://localhost:5000/api';
+
+  // ======================== DEFAULT SCHOLARSHIPS (fallback) ========================
+  const DEFAULT_SCHOLARSHIPS = [
+    {id:'s1', name:'National Merit Scholarship', org:'Ministry of Education, GoI', amt:48000, dl:'2025-07-20', income:250000, minM:80, cats:['General','OBC','SC/ST','EWS','Minority'], tag:'National', desc:'For meritorious students in UG courses.'},
+    {id:'s2', name:'SC/ST Post Matric', org:'Ministry of Social Justice', amt:26000, dl:'2025-08-10', income:200000, minM:55, cats:['SC/ST'], tag:'SC/ST', desc:'Financial assistance for SC/ST students.'},
+    {id:'s3', name:'OBC Merit Scholarship', org:'State Government', amt:20000, dl:'2025-06-30', income:180000, minM:65, cats:['OBC'], tag:'OBC', desc:'Supporting OBC students in professional courses.'},
+    {id:'s4', name:'Girls Empowerment', org:'Women & Child Development', amt:35000, dl:'2025-09-01', income:300000, minM:75, cats:['General','OBC','SC/ST'], tag:'Girls', desc:'Exclusively for female students.'},
+    {id:'s5', name:'EWS Financial Aid', org:'NSFDC', amt:30000, dl:'2025-07-25', income:800000, minM:60, cats:['EWS','General'], tag:'EWS', desc:'Economically weaker section scholarship.'}
+  ];
+
+  // Helper: fetch with auth token
+  async function apiRequest(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('token');
+    if (token) headers['x-auth-token'] = token;
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+    const res = await fetch(`${API_BASE}${endpoint}`, options);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.msg || 'Request failed');
+    }
+    return res.json();
+  }
+
+  // ======================== GLOBAL STATE ========================
+  let CU = null;                // current user object
+  let ALL_SCHOLARSHIPS = [];    // loaded from backend (or fallback)
+  let studentApplications = []; // loaded from backend
+  let studentDocs = {};         // loaded from backend
+  let currentScholarship = null, currentStep = 1, modalDocs = {};
+
+  const DOCS_LIST = [
+    {id:'d1', name:'Aadhaar card'},{id:'d2', name:'10th marksheet'},{id:'d3', name:'12th marksheet'},
+    {id:'d4', name:'Income certificate'},{id:'d5', name:'Caste certificate (opt)'},{id:'d6', name:'Bonafide certificate'},
+    {id:'d7', name:'Bank passbook'},{id:'d8', name:'Passport photo'}
+  ];
+
+  // ======================== AUTH & UI HELPERS ========================
+  function authTab(tab, btn) {
+    document.getElementById('t-login').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('t-signup').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('t-forgot').style.display = tab === 'forgot' ? 'block' : 'none';
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('auth-alert').classList.remove('show');
+  }
+  let CRole = 'student';
+  function setRole(role) { CRole = role; document.getElementById('r-student').classList.toggle('active', role === 'student'); document.getElementById('r-admin').classList.toggle('active', role === 'admin'); }
+  function authAlert(msg, type) { let el = document.getElementById('auth-alert'); el.textContent = msg; el.className = `alert show ${type}`; }
+  function toast(msg, type) { let t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `${type === 'ok' ? '✅' : 'ℹ️'} ${msg}`; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
+
+  // ======================== LOGIN / REGISTER (BACKEND) ========================
+  async function doLogin() {
+    const email = document.getElementById('l-email').value.trim();
+    const password = document.getElementById('l-pw').value;
+    if (!email || !password) { authAlert('Please fill all fields.', 'err'); return; }
+    try {
+      const data = await apiRequest('/auth/login', 'POST', { email, password, role: CRole });
+      localStorage.setItem('token', data.token);
+      CU = data.user;
+      startApp();
+    } catch (err) {
+      authAlert(err.message, 'err');
+    }
+  }
+
+  async function doSignup() {
+    const fn = document.getElementById('s-fn').value.trim(), ln = document.getElementById('s-ln').value.trim();
+    const email = document.getElementById('s-email').value.trim();
+    const password = document.getElementById('s-pw').value, cpw = document.getElementById('s-cpw').value;
+    if (!fn || !ln || !email || !password || !cpw) { authAlert('Please fill all fields.', 'err'); return; }
+    if (password.length < 8) { authAlert('Password must be at least 8 characters.', 'err'); return; }
+    if (password !== cpw) { authAlert('Passwords do not match.', 'err'); return; }
+    try {
+      const data = await apiRequest('/auth/register', 'POST', { name: `${fn} ${ln}`, email, password, role: 'student' });
+      localStorage.setItem('token', data.token);
+      CU = data.user;
+      startApp();
+    } catch (err) {
+      authAlert(err.message, 'err');
+    }
+  }
+
+  function doForgot() { const email = document.getElementById('f-email').value.trim(); if (!email) { authAlert('Please enter your email.', 'err'); return; } authAlert('Reset link sent to ' + email + ' (simulated)', 'ok'); }
+  function doLogout() { localStorage.removeItem('token'); localStorage.removeItem('user'); CU = null; document.getElementById('app').style.display = 'none'; document.getElementById('auth').style.display = 'flex'; toast('Logged out', 'info'); }
+
+  // ======================== MAIN APP INIT ========================
+  async function startApp() {
+    try {
+      const profile = await apiRequest('/profile');
+      CU = { ...CU, ...profile };
+      localStorage.setItem('user', JSON.stringify(CU));
+    } catch (err) { console.warn('Profile load failed'); }
+    await loadScholarships();
+    await loadStudentApplications();
+    await loadStudentDocuments();
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('sb-av').innerText = CU.av || CU.name.charAt(0);
+    document.getElementById('sb-un').innerText = CU.name;
+    document.getElementById('sb-ur').innerText = CU.role === 'admin' ? 'Administrator' : 'Student';
+    if (CU.role === 'admin') {
+      document.getElementById('nav-admin').style.display = 'block';
+      document.getElementById('nav-student').style.display = 'none';
+      navigateTo('a-dash');
+      loadAdminDashboard();
+    } else {
+      document.getElementById('nav-student').style.display = 'block';
+      document.getElementById('nav-admin').style.display = 'none';
+      navigateTo('dashboard');
+      renderStudentDashboard();
+    }
+    attachNavEvents();
+  }
+
+  function attachNavEvents() {
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.onclick = () => { const page = el.getAttribute('data-page'); if (page) navigateTo(page); };
+    });
+  }
+
+  function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+    const target = document.getElementById(`page-${pageId}`);
+    if (target) target.classList.add('active-page');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const activeNav = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+    if (activeNav) activeNav.classList.add('active');
+    if (pageId === 'dashboard') renderStudentDashboard();
+    if (pageId === 'scholarships') renderScholarships();
+    if (pageId === 'applications') renderStudentApplications();
+    if (pageId === 'documents') renderStudentDocuments();
+    if (pageId === 'tracking') renderStudentTracking();
+    if (pageId === 'profile') loadStudentProfile();
+    if (pageId === 'a-dash') loadAdminDashboard();
+    if (pageId === 'a-apps') renderAdminApps();
+    if (pageId === 'a-students') renderAdminStudents();
+    if (pageId === 'a-scholarships') renderAdminScholarships();
+    if (pageId === 'a-docs') renderAdminDocs();
+  }
+
+  // ======================== DATA LOADING (with fallback) ========================
+  async function loadScholarships() {
+    try {
+      const backendSchols = await apiRequest('/scholarships');
+      if (backendSchols && backendSchols.length > 0) {
+        ALL_SCHOLARSHIPS = backendSchols;
+      } else {
+        // Fallback to default scholarships if backend returns empty
+        ALL_SCHOLARSHIPS = [...DEFAULT_SCHOLARSHIPS];
+        toast('Using default scholarships (backend empty)', 'info');
+      }
+    } catch (err) {
+      console.warn('Backend error, using default scholarships', err);
+      ALL_SCHOLARSHIPS = [...DEFAULT_SCHOLARSHIPS];
+      toast('Backend unreachable – using default scholarships', 'info');
+    }
+  }
+
+  async function loadStudentApplications() {
+    if (CU.role !== 'student') return;
+    try {
+      studentApplications = await apiRequest('/applications');
+    } catch (err) { studentApplications = []; }
+  }
+  async function loadStudentDocuments() {
+    if (CU.role !== 'student') return;
+    try {
+      const docs = await apiRequest('/documents');
+      studentDocs = docs;
+    } catch (err) { studentDocs = {}; }
+  }
+
+  // ======================== STUDENT FUNCTIONS (unchanged) ========================
+  async function renderStudentDashboard() {
+    await loadStudentApplications();
+    let total = studentApplications.length;
+    let approved = studentApplications.filter(a => a.status === 'Approved' || a.status === 'Funds Disbursed').length;
+    let pending = studentApplications.filter(a => a.status === 'Submitted' || a.status === 'Under Review').length;
+    let rejected = studentApplications.filter(a => a.status === 'Rejected').length;
+    document.getElementById('dash-welcome').innerHTML = `Welcome back, ${CU.name.split(' ')[0]}!`;
+    document.getElementById('dash-stats').innerHTML = `
+      <div class="stat"><div class="stat-label">Total Applications</div><div class="stat-val">${total}</div></div>
+      <div class="stat"><div class="stat-label">Approved</div><div class="stat-val">${approved}</div></div>
+      <div class="stat"><div class="stat-label">Pending</div><div class="stat-val">${pending}</div></div>
+      <div class="stat"><div class="stat-label">Rejected</div><div class="stat-val">${rejected}</div></div>
+    `;
+    let recent = studentApplications.slice(0,3).map(a => `<div>${a.name} - <span class="badge ${a.status === 'Approved' ? 'b-green' : (a.status === 'Rejected' ? 'b-red' : 'b-blue')}">${a.status}</span></div>`).join('');
+    document.getElementById('dash-apps').innerHTML = recent || 'No applications yet.';
+    let prof = CU;
+    let filled = Object.keys(prof).filter(k => prof[k]).length;
+    let pct = Math.min(100, Math.round(filled / 15 * 100));
+    document.getElementById('profile-completion-card').innerHTML = `<progress value="${pct}" max="100" style="width:100%"></progress><div>${pct}% complete</div>`;
+    renderScholarships();
+  }
+
+  function renderScholarships() {
+    let search = document.getElementById('globalSearch').value.toLowerCase();
+    let income = parseInt(document.getElementById('incomeFilter').value) || Infinity;
+    let marks = parseInt(document.getElementById('marksFilter').value) || 0;
+    let cat = document.getElementById('categoryFilter').value;
+    let sort = document.getElementById('sortBy').value;
+    let filtered = ALL_SCHOLARSHIPS.filter(s => 
+      s.income <= income && s.minM >= marks && 
+      (!cat || s.cats.includes(cat)) &&
+      (s.name.toLowerCase().includes(search) || s.org.toLowerCase().includes(search))
+    );
+    if (sort === 'amount') filtered.sort((a,b) => b.amt - a.amt);
+    else if (sort === 'deadline') filtered.sort((a,b) => new Date(a.dl) - new Date(b.dl));
+    else filtered.sort((a,b) => a.name.localeCompare(b.name));
+    let apps = studentApplications;
+    let html = filtered.map(s => {
+      let applied = apps.some(a => a.schId === s.id);
+      let daysLeft = Math.ceil((new Date(s.dl) - new Date()) / 86400000);
+      return `<div class="sch-card" onclick="openApplyModal('${s.id}')">
+        <div><b>${s.name}</b> <span class="badge b-green">₹${s.amt}</span></div>
+        <div style="font-size:0.8rem;">${s.org}</div>
+        <div class="deadline">📅 Closes: ${s.dl} (${daysLeft > 0 ? daysLeft + 'd' : 'Expired'})</div>
+        <button class="btn-apply" ${applied ? 'disabled' : ''}>${applied ? 'Applied' : 'Apply now'}</button>
+      </div>`;
+    }).join('');
+    document.getElementById('scholarshipGrid').innerHTML = html || '<div class="card">No scholarships match</div>';
+  }
+
+  function applyFiltersAndSort() { renderScholarships(); }
+  function resetAllFilters() {
+    document.getElementById('incomeFilter').value = '';
+    document.getElementById('marksFilter').value = '';
+    document.getElementById('categoryFilter').value = '';
+    document.getElementById('sortBy').value = 'amount';
+    document.getElementById('globalSearch').value = '';
+    renderScholarships();
+  }
+  function handleGlobalSearch() { renderScholarships(); }
+
+  function renderStudentApplications() {
+    let cont = document.getElementById('apps-card');
+    if (studentApplications.length === 0) cont.innerHTML = '<div>No applications yet.</div>';
+    else cont.innerHTML = `<table class="dt"><tr><th>Scholarship</th><th>Status</th><th>Amount</th><tr>${studentApplications.map(a => `<tr><td><strong>${a.name}</strong></td><td><span class="badge ${a.status === 'Approved' ? 'b-green' : (a.status === 'Rejected' ? 'b-red' : 'b-blue')}">${a.status}</span></td><td>₹${a.amt}</td>`).join('')} </table>`;
+  }
+
+  function renderStudentDocuments() {
+    let html = DOCS_LIST.map(d => `<div class="doc-card" onclick="document.getElementById('df-${d.id}').click()"><input type="file" id="df-${d.id}" style="display:none" onchange="uploadStudentDoc('${d.id}',this)"><div>📄 ${d.name}</div><div>${studentDocs[d.id] ? '✅' : '⬆️'}</div></div>`).join('');
+    document.getElementById('doc-grid').innerHTML = html;
+  }
+
+  async function uploadStudentDoc(id, inp) {
+    if (!inp.files[0]) return;
+    const formData = new FormData();
+    formData.append('file', inp.files[0]);
+    formData.append('docType', id);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/documents/upload', {
+        method: 'POST',
+        headers: { 'x-auth-token': token },
+        body: formData
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      toast('Uploaded', 'ok');
+      await loadStudentDocuments();
+      renderStudentDocuments();
+    } catch (err) { toast('Upload error', 'err'); }
+  }
+
+  function renderStudentTracking() {
+    let steps = ['Submitted', 'Under Review', 'Approved', 'Funds Disbursed'];
+    let trackDiv = document.getElementById('track-list');
+    if (studentApplications.length === 0) { trackDiv.innerHTML = '<div class="card">No applications to track.</div>'; return; }
+    let html = '';
+    for (let app of studentApplications) {
+      let idx = steps.indexOf(app.status);
+      let isRejected = app.status === 'Rejected';
+      html += `<div class="card"><div><b>${app.name}</b> <span class="badge ${isRejected ? 'b-red' : 'b-blue'}">${app.status}</span></div><div>Applied: ${app.date}</div>`;
+      if (isRejected) html += `<div class="rejection-message">⚠️ Application rejected. You may re-apply if deadline not passed.</div>`;
+      else {
+        html += `<div class="track-steps">`;
+        for (let i = 0; i < steps.length; i++) {
+          let cls = '';
+          if (i < idx) cls = 'completed';
+          else if (i === idx) cls = 'current';
+          html += `<div class="track-step ${cls}"><div class="step-circle">${i < idx ? '✓' : i+1}</div><div class="step-label">${steps[i]}</div></div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+    trackDiv.innerHTML = html;
+  }
+
+  async function loadStudentProfile() {
+    try {
+      const prof = await apiRequest('/profile');
+      document.getElementById('p-name').value = prof.name || '';
+      document.getElementById('p-dob').value = prof.dob ? prof.dob.split('T')[0] : '';
+      document.getElementById('p-aadhaar').value = prof.aadhaar || '';
+      document.getElementById('p-phone').value = prof.phone || '';
+      document.getElementById('p-gender').value = prof.gender || 'Male';
+      document.getElementById('p-cat').value = prof.cat || 'General';
+      document.getElementById('p-ssc').value = prof.ssc || '';
+      document.getElementById('p-inter').value = prof.inter || '';
+      document.getElementById('p-college').value = prof.college || '';
+      document.getElementById('p-course').value = prof.course || '';
+      document.getElementById('p-cgpa').value = prof.cgpa || '';
+      document.getElementById('p-year').value = prof.year || '1st';
+      document.getElementById('p-income').value = prof.income || '';
+      document.getElementById('p-state').value = prof.state || '';
+      document.getElementById('p-disability').value = prof.disability || 'None';
+    } catch (err) { toast('Error loading profile', 'err'); }
+  }
+
+  async function saveProfile() {
+    const profileData = {
+      name: document.getElementById('p-name').value,
+      dob: document.getElementById('p-dob').value,
+      aadhaar: document.getElementById('p-aadhaar').value,
+      phone: document.getElementById('p-phone').value,
+      gender: document.getElementById('p-gender').value,
+      cat: document.getElementById('p-cat').value,
+      ssc: parseFloat(document.getElementById('p-ssc').value) || 0,
+      inter: parseFloat(document.getElementById('p-inter').value) || 0,
+      college: document.getElementById('p-college').value,
+      course: document.getElementById('p-course').value,
+      cgpa: document.getElementById('p-cgpa').value,
+      year: document.getElementById('p-year').value,
+      income: parseInt(document.getElementById('p-income').value) || 0,
+      state: document.getElementById('p-state').value,
+      disability: document.getElementById('p-disability').value
+    };
+    try {
+      await apiRequest('/profile', 'PUT', profileData);
+      toast('Profile saved!', 'ok');
+      CU = { ...CU, ...profileData };
+      renderStudentDashboard();
+    } catch (err) { toast('Error saving profile', 'err'); }
+  }
+
+  // ======================== 5-STEP APPLICATION MODAL (unchanged) ========================
+  function openApplyModal(schId) {
+    currentScholarship = ALL_SCHOLARSHIPS.find(s => s.id === schId);
+    if (!currentScholarship) return;
+    if (studentApplications.some(a => a.schId === schId)) { toast('Already applied!', 'err'); return; }
+    currentStep = 1; modalDocs = {};
+    prefillModal(); updateModalUI(); renderModalDocs();
+    document.getElementById('applyModal').style.display = 'flex';
+  }
+  function closeModal() { document.getElementById('applyModal').style.display = 'none'; }
+  function prefillModal() {
+    let prof = CU;
+    if (prof.name) document.getElementById('appName').value = prof.name;
+    if (prof.dob) document.getElementById('appDob').value = prof.dob ? prof.dob.split('T')[0] : '';
+    if (prof.aadhaar) document.getElementById('appAadhaar').value = prof.aadhaar;
+    if (prof.phone) document.getElementById('appPhone').value = prof.phone;
+    if (CU.email) document.getElementById('appEmail').value = CU.email;
+    if (prof.college) document.getElementById('appCollege').value = prof.college;
+    if (prof.course) document.getElementById('appCourse').value = prof.course;
+    if (prof.cgpa) document.getElementById('appCgpa').value = prof.cgpa;
+    if (prof.ssc) document.getElementById('appSsc').value = prof.ssc;
+    if (prof.inter) document.getElementById('appInter').value = prof.inter;
+    if (prof.income) document.getElementById('appIncome').value = prof.income;
+    if (prof.cat) document.getElementById('appCategory').value = prof.cat;
+    const essayField = document.getElementById('appEssay');
+    essayField.oninput = () => {
+      let words = essayField.value.trim().split(/\s+/).filter(w => w).length;
+      document.getElementById('wordCount').innerText = words + ' words' + (words < 20 ? ' (min 20)' : '');
+    };
+  }
+  function renderModalDocs() {
+    let html = DOCS_LIST.map(d => `<div class="doc-card" onclick="document.getElementById('modalFile-${d.id}').click()"><input type="file" id="modalFile-${d.id}" style="display:none" onchange="uploadModalDoc('${d.id}',this)"><div>📄 ${d.name}</div><div>${modalDocs[d.id] ? '✅' : '⬆️'}</div></div>`).join('');
+    document.getElementById('modalDocsGrid').innerHTML = html;
+  }
+  function uploadModalDoc(id, inp) { if (inp.files[0]) { modalDocs[id] = inp.files[0].name; toast('Added: ' + inp.files[0].name, 'ok'); renderModalDocs(); } }
+  function updateModalUI() {
+    for (let i = 1; i <= 5; i++) { let div = document.getElementById(`step${i}`); if (div) div.classList.toggle('active', i === currentStep); }
+    let percent = (currentStep / 5) * 100;
+    document.getElementById('stepLabel').innerText = `Step ${currentStep} of 5`;
+    document.getElementById('stepPercent').innerText = `${percent}%`;
+    document.getElementById('pfill').style.width = `${percent}%`;
+    let names = ['Personal', 'Bank', 'Academic', 'Info', 'Documents'];
+    let dots = '';
+    for (let i = 1; i <= 5; i++) {
+      let cls = 'sdot';
+      if (i < currentStep) cls += ' done';
+      if (i === currentStep) cls += ' active';
+      dots += `<div class="step-dot-item"><div class="${cls}">${i < currentStep ? '✓' : i}</div><div class="step-label">${names[i-1]}</div></div>`;
+    }
+    document.getElementById('stepDots').innerHTML = dots;
+    document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'inline-flex';
+    document.getElementById('nextBtn').innerText = currentStep === 5 ? 'Submit ✓' : 'Next step →';
+  }
+  function validateStep() {
+    if (currentStep === 1) { if (!document.getElementById('appName').value) { toast('Full name required', 'err'); return false; } return true; }
+    if (currentStep === 2) {
+      let acc = document.getElementById('bankAccNo').value, acc2 = document.getElementById('bankAccNo2').value;
+      let ifsc = document.getElementById('bankIfsc').value;
+      if (!acc || !ifsc) { toast('Account & IFSC required', 'err'); return false; }
+      if (acc !== acc2) { toast('Account numbers do not match', 'err'); return false; }
+      return true;
+    }
+    if (currentStep === 4) {
+      let words = document.getElementById('appEssay').value.trim().split(/\s+/).filter(w => w).length;
+      if (words < 20) { toast('Essay must be at least 20 words', 'err'); return false; }
+      return true;
+    }
+    return true;
+  }
+  function nextStep() { if (!validateStep()) return; if (currentStep === 5) { submitApplication(); return; } currentStep++; updateModalUI(); }
+  function prevStep() { if (currentStep > 1) { currentStep--; updateModalUI(); } }
+  async function submitApplication() {
+    const applicationData = {
+      scholarshipId: currentScholarship.id,
+      personalData: {
+        fullName: document.getElementById('appName').value,
+        dob: document.getElementById('appDob').value,
+        aadhaar: document.getElementById('appAadhaar').value,
+        mobile: document.getElementById('appPhone').value,
+        email: document.getElementById('appEmail').value,
+        address: document.getElementById('appAddress').value
+      },
+      bankData: {
+        accountHolder: document.getElementById('bankAccName').value,
+        accountNumber: document.getElementById('bankAccNo').value,
+        ifsc: document.getElementById('bankIfsc').value,
+        bankName: document.getElementById('bankName').value,
+        branch: document.getElementById('bankBranch').value
+      },
+      academicData: {
+        college: document.getElementById('appCollege').value,
+        course: document.getElementById('appCourse').value,
+        year: document.getElementById('appYear').value,
+        cgpa: parseFloat(document.getElementById('appCgpa').value) || 0,
+        ssc: parseFloat(document.getElementById('appSsc').value) || 0,
+        inter: parseFloat(document.getElementById('appInter').value) || 0,
+        enrollment: document.getElementById('appEnroll').value,
+        tuition: parseInt(document.getElementById('appTuition').value) || 0
+      },
+      additionalData: {
+        essay: document.getElementById('appEssay').value,
+        familyBackground: document.getElementById('appFamily').value,
+        careerGoals: document.getElementById('appGoals').value,
+        annualIncome: parseInt(document.getElementById('appIncome').value) || 0,
+        category: document.getElementById('appCategory').value
+      },
+      documents: Object.values(modalDocs)
+    };
+    try {
+      await apiRequest('/applications', 'POST', applicationData);
+      closeModal();
+      toast('Application submitted!', 'ok');
+      await loadStudentApplications();
+      renderStudentDashboard();
+      if (document.getElementById('page-applications').classList.contains('active-page')) renderStudentApplications();
+      if (document.getElementById('page-tracking').classList.contains('active-page')) renderStudentTracking();
+    } catch (err) { toast('Submission failed: ' + err.message, 'err'); }
+  }
+
+  // ======================== ADMIN FUNCTIONS (unchanged) ========================
+  async function loadAdminDashboard() {
+    try {
+      const stats = await apiRequest('/admin/stats');
+      document.getElementById('admin-stats').innerHTML = `
+        <div class='stat'><div class='stat-label'>Students</div><div class='stat-val'>${stats.totalStudents}</div></div>
+        <div class='stat'><div class='stat-label'>Total Apps</div><div class='stat-val'>${stats.totalApps}</div></div>
+        <div class='stat'><div class='stat-label'>Pending</div><div class='stat-val'>${stats.pendingApps}</div></div>
+        <div class='stat'><div class='stat-label'>Approved</div><div class='stat-val'>${stats.approvedApps}</div></div>
+      `;
+      const apps = await apiRequest('/admin/applications');
+      const recent = apps.slice(0,5).map(a => `<div>${a.studentId.name} - ${a.scholarshipId.name} <span class="badge b-blue">${a.status}</span></div>`).join('');
+      document.getElementById('a-recent').innerHTML = recent || '<div>No applications</div>';
+    } catch (err) { toast('Error loading admin dashboard', 'err'); }
+  }
+
+  async function renderAdminApps() {
+    const search = document.getElementById('admAppSearch').value.toLowerCase();
+    const apps = await apiRequest('/admin/applications');
+    let filtered = apps;
+    if (search) filtered = apps.filter(a => a.studentId.name.toLowerCase().includes(search) || a.scholarshipId.name.toLowerCase().includes(search));
+    const rows = filtered.map(a => `
+      <tr>
+        <td><strong>${a.studentId.name}</strong></td>
+        <td>${a.scholarshipId.name}</td>
+        <td><select class="app-status-select" data-id="${a._id}">${['Submitted','Under Review','Approved','Funds Disbursed','Rejected'].map(s => `<option ${a.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+        <td><button class="btn-apply" onclick="adminUpdateAppStatus('${a._id}')">Update</button></td>
+      </tr>
+    `).join('');
+    document.getElementById('a-apps-tbody').innerHTML = rows || '<tr><td colspan="4">No applications found</td></tr>';
+  }
+
+  async function adminUpdateAppStatus(appId) {
+    const select = document.querySelector(`.app-status-select[data-id="${appId}"]`);
+    if (!select) return;
+    const newStatus = select.value;
+    try {
+      await apiRequest(`/admin/applications/${appId}/status`, 'PUT', { status: newStatus });
+      toast(`Status updated to ${newStatus}`, 'ok');
+      renderAdminApps();
+      if (CU.role === 'student') {
+        await loadStudentApplications();
+        renderStudentDashboard();
+        renderStudentApplications();
+        renderStudentTracking();
+      }
+    } catch (err) { toast('Update failed', 'err'); }
+  }
+
+  async function renderAdminStudents() {
+    const search = document.getElementById('admStudentSearch').value.toLowerCase();
+    const students = await apiRequest('/admin/students');
+    const filtered = students.filter(s => s.name.toLowerCase().includes(search));
+    const rows = filtered.map(s => `<tr><td><strong>${s.name}</strong></td><td>${s.email}</td><td>${s.college || 'N/A'}</td><td>${s.applicationCount || 0}</td>`).join('');
+    document.getElementById('a-stu-tbody').innerHTML = rows || '<tr><td colspan="4">No students found</td></tr>';
+  }
+
+  async function renderAdminScholarships() {
+    const scholarships = await apiRequest('/scholarships');
+    const rows = scholarships.map(s => `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td>₹${s.amt}</td><td>${s.dl}</td>
+        <td><button class="btn-apply" onclick="editScholarship('${s.id}')">Edit</button> <button class="btn-apply" style="background:var(--danger);" onclick="deleteScholarship('${s.id}')">Delete</button></td>
+      </tr>
+    `).join('');
+    document.getElementById('a-sch-tbody').innerHTML = rows;
+  }
+
+  let editingSchId = null;
+  function editScholarship(id) {
+    const s = ALL_SCHOLARSHIPS.find(x => x.id === id);
+    if (s) {
+      editingSchId = id;
+      document.getElementById('schModalTitle').innerText = 'Edit Scholarship';
+      document.getElementById('schName').value = s.name;
+      document.getElementById('schOrg').value = s.org;
+      document.getElementById('schAmt').value = s.amt;
+      document.getElementById('schDl').value = s.dl;
+      document.getElementById('schIncome').value = s.income;
+      document.getElementById('schMinM').value = s.minM;
+      document.getElementById('schCats').value = s.cats.join(',');
+      document.getElementById('schTag').value = s.tag;
+      document.getElementById('schDesc').value = s.desc;
+      document.getElementById('scholarshipModal').style.display = 'flex';
+    }
+  }
+  function openScholarshipModal() {
+    editingSchId = null;
+    document.getElementById('schModalTitle').innerText = 'Add Scholarship';
+    document.getElementById('schName').value = '';
+    document.getElementById('schOrg').value = '';
+    document.getElementById('schAmt').value = '';
+    document.getElementById('schDl').value = '';
+    document.getElementById('schIncome').value = '';
+    document.getElementById('schMinM').value = '';
+    document.getElementById('schCats').value = '';
+    document.getElementById('schTag').value = '';
+    document.getElementById('schDesc').value = '';
+    document.getElementById('scholarshipModal').style.display = 'flex';
+  }
+  function closeScholarshipModal() { document.getElementById('scholarshipModal').style.display = 'none'; }
+  async function saveScholarship() {
+    const name = document.getElementById('schName').value;
+    const org = document.getElementById('schOrg').value;
+    const amt = parseInt(document.getElementById('schAmt').value);
+    const dl = document.getElementById('schDl').value;
+    const income = parseInt(document.getElementById('schIncome').value);
+    const minM = parseInt(document.getElementById('schMinM').value);
+    const cats = document.getElementById('schCats').value.split(',').map(s => s.trim());
+    const tag = document.getElementById('schTag').value;
+    const desc = document.getElementById('schDesc').value;
+    if (!name || !amt || !dl) { toast('Fill required fields', 'err'); return; }
+    const payload = { name, org, amt, dl, income, minM, cats, tag, desc };
+    try {
+      if (editingSchId) {
+        await apiRequest(`/scholarships/${editingSchId}`, 'PUT', payload);
+      } else {
+        await apiRequest('/scholarships', 'POST', payload);
+      }
+      await loadScholarships();
+      closeScholarshipModal();
+      renderAdminScholarships();
+      if (document.getElementById('page-scholarships').classList.contains('active-page')) renderScholarships();
+      toast('Scholarship saved', 'ok');
+    } catch (err) { toast('Error saving scholarship', 'err'); }
+  }
+  async function deleteScholarship(id) {
+    if (!confirm('Delete this scholarship?')) return;
+    try {
+      await apiRequest(`/scholarships/${id}`, 'DELETE');
+      await loadScholarships();
+      renderAdminScholarships();
+      if (document.getElementById('page-scholarships').classList.contains('active-page')) renderScholarships();
+      toast('Deleted', 'ok');
+    } catch (err) { toast('Delete failed', 'err'); }
+  }
+
+  async function renderAdminDocs() {
+    const students = await apiRequest('/admin/students');
+    let rows = [];
+    for (const s of students) {
+      const docs = await apiRequest(`/documents/student/${s._id}`).catch(() => []);
+      for (const d of DOCS_LIST) {
+        const uploaded = docs.find(doc => doc.docType === d.id);
+        rows.push(`<tr>
+          <td>${s.name}</td><td>${d.name}</td>
+          <td><span class="badge ${uploaded ? 'b-green' : 'b-red'}">${uploaded ? 'Uploaded' : 'Missing'}</span></td>
+          <td><button class="btn-apply" onclick="adminVerifyDoc('${s._id}','${d.id}')">Mark Verified</button></td>
+        </tr>`);
+      }
+    }
+    document.getElementById('a-doc-tbody').innerHTML = rows.slice(0,20).join('');
+  }
+  async function adminVerifyDoc(studentId, docId) {
+    try {
+      await apiRequest('/admin/verify-doc', 'POST', { studentId, docId });
+      toast('Document verified', 'ok');
+      renderAdminDocs();
+    } catch (err) { toast('Verification failed', 'err'); }
+  }
+
+  // ======================== INITIALIZE ========================
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  if (token && user) {
+    CU = JSON.parse(user);
+    startApp();
+  } else {
+    document.getElementById('auth').style.display = 'flex';
+  }
+
+  // Expose global functions for HTML onclick
+  window.authTab = authTab;
+  window.setRole = setRole;
+  window.doLogin = doLogin;
+  window.doSignup = doSignup;
+  window.doForgot = doForgot;
+  window.doLogout = doLogout;
+  window.applyFiltersAndSort = applyFiltersAndSort;
+  window.resetAllFilters = resetAllFilters;
+  window.handleGlobalSearch = handleGlobalSearch;
+  window.uploadStudentDoc = uploadStudentDoc;
+  window.saveProfile = saveProfile;
+  window.openApplyModal = openApplyModal;
+  window.closeModal = closeModal;
+  window.nextStep = nextStep;
+  window.prevStep = prevStep;
+  window.uploadModalDoc = uploadModalDoc;
+  window.adminUpdateAppStatus = adminUpdateAppStatus;
+  window.editScholarship = editScholarship;
+  window.deleteScholarship = deleteScholarship;
+  window.openScholarshipModal = openScholarshipModal;
+  window.closeScholarshipModal = closeScholarshipModal;
+  window.saveScholarship = saveScholarship;
+  window.adminVerifyDoc = adminVerifyDoc;
+  window.renderAdminApps = renderAdminApps;
+  window.renderAdminStudents = renderAdminStudents;
+  window.navigateTo = navigateTo;
+</script>
+</body>
+</html> 
