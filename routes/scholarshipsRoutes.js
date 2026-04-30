@@ -3,6 +3,7 @@ const router = express.Router();
 const Scholarship = require('../models/Scholarship');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const defaultScholarships = require('../data/defaultScholarships');
 
 const adminOnly = async (req, res, next) => {
   const user = await User.findById(req.user.id);
@@ -12,7 +13,10 @@ const adminOnly = async (req, res, next) => {
 
 router.get('/', async (req, res) => {
   try {
-    const scholarships = await Scholarship.find();
+    let scholarships = await Scholarship.find();
+    if (scholarships.length === 0) {
+      scholarships = await Scholarship.insertMany(defaultScholarships);
+    }
     res.json(scholarships);
   } catch (err) {
     res.status(500).send('Server error');
