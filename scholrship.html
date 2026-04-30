@@ -184,7 +184,7 @@
 
 <script>
   // ======================== BACKEND API BASE ========================
-  const API_BASE = 'http://localhost:5000/api';
+  const API_BASE = `${window.location.origin}/api`;
 
   // ======================== DEFAULT SCHOLARSHIPS (fallback) ========================
   const DEFAULT_SCHOLARSHIPS = [
@@ -439,7 +439,7 @@
     formData.append('docType', id);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/documents/upload', {
+      const res = await fetch(`${API_BASE}/documents/upload`, {
         method: 'POST',
         headers: { 'x-auth-token': token },
         body: formData
