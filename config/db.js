@@ -2,10 +2,16 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/scholar_elite');
+    const mongoUri = process.env.MONGO_URI || (process.env.NODE_ENV !== 'production' ? 'mongodb://localhost:27017/scholarship' : null);
+
+    if (!mongoUri) {
+      throw new Error('MONGO_URI is required in production. Add it in Render environment variables.');
+    }
+
+    await mongoose.connect(mongoUri);
     console.log('MongoDB connected');
   } catch (err) {
-    console.error(err.message);
+    console.error(`MongoDB connection failed: ${err.message}`);
     process.exit(1);
   }
 };
